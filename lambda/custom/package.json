@@ -9,7 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ask-sdk-core": "^2.0.0",
-    "ask-sdk-model": "^1.0.0"
+    "ask-sdk-core": "^2.5.1",
+    "ask-sdk-dynamodb-persistence-adapter": "^2.5.1",
+    "ask-sdk-model": "^1.0.0",
+    "aws-sdk": "^2.441.0",
+    "save": "^2.3.3"
   }
 }
