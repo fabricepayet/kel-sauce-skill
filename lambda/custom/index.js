@@ -1,11 +1,11 @@
 const Alexa = require("ask-sdk-core");
 const helpers = require("./helpers.js");
 var AWS = require("aws-sdk");
-import { promisify } from "util";
+const util = require("util");
 
-var docClient = new AWS.DynamoDB.DocumentClient();
+const docClient = new AWS.DynamoDB.DocumentClient();
 
-async function getSauceFromDatabase() {
+function getSauceFromDatabase(callback) {
   const meals = [];
   const params = {
     TableName: "sauce",
@@ -16,10 +16,18 @@ async function getSauceFromDatabase() {
       ":id": 1
     }
   };
-  const data = await promisify(docClient.query)(params);
-  console.log("JSONData", JSON.stringify(data));
-  data.forEach(result => meals.push(...result.Meals));
-  return meals;
+  console.log("docClient", docClient);
+  // const data = await util.promisify(docClient.query)(params);
+
+  docClient.query(params, function(err, data) {
+    if (err) {
+      callback(err);
+    } else {
+      console.log("JSONData", JSON.stringify(data));
+      data.Items.forEach(result => meals.push(...result.Meals));
+      callback(null, meals);
+    }
+  });
 }
 
 const LaunchRequestHandler = {
@@ -44,7 +52,7 @@ const SauceIntentHandler = {
       handlerInput.requestEnvelope.request.intent.name === "sauce"
     );
   },
-  async handle(handlerInput) {
+  handle(handlerInput) {
     const { intent } = handlerInput.requestEnvelope.request;
     console.log("----> handlerInput", JSON.stringify(handlerInput));
     // const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
@@ -53,16 +61,16 @@ const SauceIntentHandler = {
     // const slotValues = helpers.getSlotValues(filledSlots);
     let speechOutput = "";
 
-    const meals = await getSauceFromDatabase();
+    getSauceFromDatabase(function(err, meals) {
+      console.log("----> meals", meals);
 
-    console.log("----> meals", meals);
-
-    if (meals.indexOf(meals) === -1) {
-      speechOutput += "Je ne trouve pas de sauce pour ce plat";
-    } else {
-      speechOutput = "J'ai trouvé une sauce pour ce plat";
-    }
-    return handlerInput.responseBuilder.speak(speechOutput).getResponse();
+      if (meals.indexOf(meals) === -1) {
+        speechOutput += "Je ne trouve pas de sauce pour ce plat";
+      } else {
+        speechOutput = "J'ai trouvé une sauce pour ce plat";
+      }
+      return handlerInput.responseBuilder.speak(speechOutput).getResponse();
+    });
   }
 };
 
@@ -95,12 +103,9 @@ const CancelAndStopIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const speechText = "Goodbye!";
+    const speechText = "Au revoir!";
 
-    return handlerInput.responseBuilder
-      .speak(speechText)
-      .withSimpleCard("Hello World", speechText)
-      .getResponse();
+    return handlerInput.responseBuilder.speak(speechText).getResponse();
   }
 };
 
@@ -127,8 +132,8 @@ const ErrorHandler = {
     console.log(`Error handled: ${error.message}`);
 
     return handlerInput.responseBuilder
-      .speak("Sorry, I can't understand the command. Please say again.")
-      .reprompt("Sorry, I can't understand the command. Please say again.")
+      .speak("Désolé je n'arrive pas à comprendre la commande.")
+      .reprompt("Désolé je n'arrive pas à comprendre la commande.")
       .getResponse();
   }
 };
