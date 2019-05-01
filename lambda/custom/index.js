@@ -17,7 +17,8 @@ async function getSauceFromDatabase(handlerInput) {
     }
   };
   const data = await docClient.query(params);
-  data.forEach(result => meals.push(...data.Meals));
+  console.log("JSONData", JSON.stringify(data));
+  data.forEach(result => meals.push(...result.Meals));
   return meals;
 }
 
