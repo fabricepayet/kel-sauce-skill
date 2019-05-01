@@ -1,11 +1,11 @@
 const Alexa = require("ask-sdk-core");
 const helpers = require("./helpers.js");
 var AWS = require("aws-sdk");
-meals = [];
+import { promisify } from "util";
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
-async function getSauceFromDatabase(handlerInput) {
+async function getSauceFromDatabase() {
   const meals = [];
   const params = {
     TableName: "sauce",
@@ -16,7 +16,7 @@ async function getSauceFromDatabase(handlerInput) {
       ":id": 1
     }
   };
-  const data = await docClient.query(params);
+  const data = await promisify(docClient.query)(params);
   console.log("JSONData", JSON.stringify(data));
   data.forEach(result => meals.push(...result.Meals));
   return meals;
@@ -46,14 +46,16 @@ const SauceIntentHandler = {
   },
   async handle(handlerInput) {
     const { intent } = handlerInput.requestEnvelope.request;
-    console.log("----> intent", intent);
+    console.log("----> handlerInput", JSON.stringify(handlerInput));
     // const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     const filledSlots = handlerInput.requestEnvelope.request.intent;
     // const slotValues = helpers.getSlotValues(filledSlots);
     let speechOutput = "";
 
-    const meals = await getSauceFromDatabase(handlerInput);
+    const meals = await getSauceFromDatabase();
+
+    console.log("----> meals", meals);
 
     if (meals.indexOf(meals) === -1) {
       speechOutput += "Je ne trouve pas de sauce pour ce plat";
