@@ -1,6 +1,3 @@
-/* eslint-disable  func-names */
-/* eslint-disable  no-console */
-
 const Alexa = require("ask-sdk-core");
 const helpers = require("./helpers.js");
 var AWS = require("aws-sdk");
@@ -8,59 +5,20 @@ meals = [];
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
-var params = {
-  TableName: "sauce",
-  IndexName: "id-NameSauce-index",
-  Limit: 100,
-  KeyConditionExpression: "id = :id",
-  ExpressionAttributeValues: {
-    ":id": 1
-  }
-};
-
-function getSauce(handlerInput) {
-  const sessionAttributes = {};
-  let meals = [];
-
-  docClient.query(params, function(err, data) {
-    meals = [];
-    if (err) {
-      console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
-    } else {
-      console.log("Query succeeded.");
-      data.Items.forEach(function(item) {
-        meals = [];
-        console.log(item.meals);
-      });
+async function getSauceFromDatabase(handlerInput) {
+  const meals = [];
+  const params = {
+    TableName: "sauce",
+    IndexName: "id-NameSauce-index",
+    Limit: 100,
+    KeyConditionExpression: "id = :id",
+    ExpressionAttributeValues: {
+      ":id": 1
     }
-
-    Object.assign(sessionAttributes, {
-      meals: meals
-    });
-  });
-  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-}
-
-function sauce(handlerInput) {
-  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
-  const filledSlots = handlerInput.requestEnvelope.request.intent;
-  const slotValues = helpers.getSlotValues(filledSlots);
-  let speechOutput = "";
-
-  getSauce(handlerInput);
-
-  if (
-    handlerInput.requestEnvelope.request.intent.sauce ===
-    `${sessionAttributes.meals}`
-  ) {
-    speechOutput = "Super";
-  } else {
-    speechOutput = "Mole";
-
-    console.log(sessionAttributes.meals);
-  }
-  return handlerInput.responseBuilder.speak(speechOutput).getResponse();
+  };
+  const data = await docClient.query(params);
+  data.forEach(result => meals.push(...data.Meals));
+  return meals;
 }
 
 const LaunchRequestHandler = {
@@ -85,8 +43,23 @@ const SauceIntentHandler = {
       handlerInput.requestEnvelope.request.intent.name === "sauce"
     );
   },
-  handle(handlerInput) {
-    return sauce(handlerInput);
+  async handle(handlerInput) {
+    const { intent } = handlerInput.requestEnvelope.request;
+    console.log("----> intent", intent);
+    // const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+    const filledSlots = handlerInput.requestEnvelope.request.intent;
+    // const slotValues = helpers.getSlotValues(filledSlots);
+    let speechOutput = "";
+
+    const meals = await getSauceFromDatabase(handlerInput);
+
+    if (meals.indexOf(meals) === -1) {
+      speechOutput += "Je ne trouve pas de sauce pour ce plat";
+    } else {
+      speechOutput = "J'ai trouvé une sauce pour ce plat";
+    }
+    return handlerInput.responseBuilder.speak(speechOutput).getResponse();
   }
 };
 

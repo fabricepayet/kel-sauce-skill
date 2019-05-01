@@ -6,7 +6,7 @@
       "merge": {},
       "resources": {
         "manifest": {
-          "eTag": "3880dee23bc9651451e765502df68ec7"
+          "eTag": "7d8c7c246277577eef175b6e1508efab"
         },
         "interactionModel": {
           "en-US": {
@@ -23,7 +23,7 @@
             "codeUri": "lambda/custom",
             "functionName": "ask-custom-Quelle_sauce-default",
             "handler": "index.handler",
-            "revisionId": "a656be11-4b78-46dd-bd71-d7beb7796541",
+            "revisionId": "f891a3e9-f112-4eed-8109-8e83247b2aaa",
             "runtime": "nodejs8.10"
           }
         ]
