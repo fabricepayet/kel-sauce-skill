@@ -16,14 +16,11 @@ function getSauceFromDatabase(callback) {
       ":id": 1
     }
   };
-  console.log("docClient", docClient);
-  // const data = await util.promisify(docClient.query)(params);
 
   docClient.query(params, function(err, data) {
     if (err) {
       callback(err);
     } else {
-      console.log("JSONData", JSON.stringify(data));
       data.Items.forEach(result => meals.push(...result.Meals));
       callback(null, meals);
     }
@@ -52,25 +49,15 @@ const SauceIntentHandler = {
       handlerInput.requestEnvelope.request.intent.name === "sauce"
     );
   },
-  handle(handlerInput) {
-    const { intent } = handlerInput.requestEnvelope.request;
-    console.log("----> handlerInput", JSON.stringify(handlerInput));
-    // const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
-    const filledSlots = handlerInput.requestEnvelope.request.intent;
-    // const slotValues = helpers.getSlotValues(filledSlots);
+  async handle(handlerInput) {
     let speechOutput = "";
-
-    getSauceFromDatabase(function(err, meals) {
-      console.log("----> meals", meals);
-
-      if (meals.indexOf(meals) === -1) {
-        speechOutput += "Je ne trouve pas de sauce pour ce plat";
-      } else {
-        speechOutput = "J'ai trouvé une sauce pour ce plat";
-      }
-      return handlerInput.responseBuilder.speak(speechOutput).getResponse();
-    });
+    const meals = await util.promisify(getSauceFromDatabase)();
+    if (meals.indexOf("agneau") === -1) {
+      speechOutput += "Je ne trouve pas de sauce pour ce plat";
+    } else {
+      speechOutput = "J'ai trouvé une sauce pour ce plat";
+    }
+    return handlerInput.responseBuilder.speak(speechOutput).getResponse();
   }
 };
 
