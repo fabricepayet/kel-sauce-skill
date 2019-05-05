@@ -1,0 +1,67 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "quelle sauce",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "Meal",
+          "slots": [
+            {
+              "name": "Repas",
+              "type": "LIST_OF_MEALS"
+            }
+          ],
+          "samples": [
+            "du {Repas}",
+            "{Repas}",
+            "Je veux faire du {Repas}",
+            "je vais préparer du {Repas}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "LIST_OF_MEALS",
+          "values": [
+            {
+              "name": {
+                "value": "boeuf"
+              }
+            },
+            {
+              "name": {
+                "value": "agneau"
+              }
+            },
+            {
+              "name": {
+                "value": "poulet"
+              }
+            },
+            {
+              "name": {
+                "value": "canard"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

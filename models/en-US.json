@@ -17,9 +17,7 @@
         },
         {
           "name": "HelloWorldIntent",
-          "samples": [
-            "hello"
-          ]
+          "samples": ["hello"]
         }
       ]
     }

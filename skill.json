@@ -1,30 +1,40 @@
 {
   "manifest": {
-    "publishingInformation": {
-      "locales": {
-        "en-US": {
-          "summary": "Sample Short Description",
-          "examplePhrases": [
-            "Alexa open hello world",
-            "hello",
-            "help"
-          ],
-          "name": "Hello World",
-          "description": "Sample Full Description"
-        }
-      },
-      "isAvailableWorldwide": true,
-      "testingInstructions": "Sample Testing Instructions.",
-      "category": "KNOWLEDGE_AND_TRIVIA",
-      "distributionCountries": []
-    },
     "apis": {
       "custom": {
         "endpoint": {
           "sourceDir": "lambda/custom",
-          "uri": "ask-custom-helloworld-default"
+          "uri": "ask-Quelle_sauce-default"
         }
       }
+    },
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "Quelle sauce",
+          "examplePhrases": [
+            "quelle sauce",
+            "je vais préparer du boeuf",
+            "du poulet"
+          ],
+          "name": "Quelle sauce",
+          "description": "Quelle sauce vous permet de choisir la sauce adapté à votre repas et vous donne la recette pour la réaliser"
+        },
+        "fr-FR": {
+          "summary": "Quelle sauce",
+          "examplePhrases": [
+            "quelle sauce",
+            "je vais préparer du boeuf",
+            "du poulet"
+          ],
+          "name": "Quelle sauce",
+          "description": "Quelle sauce vous permet de choisir la sauce adapté à votre repas et vous donne la recette pour la réaliser"
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "Describe sauce",
+      "category": "KNOWLEDGE_AND_TRIVIA",
+      "distributionCountries": []
     },
     "manifestVersion": "1.0"
   }
