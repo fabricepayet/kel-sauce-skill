@@ -8,8 +8,8 @@ function getSaucesForMeal(meal, callback) {
   const params = {
     TableName: "sauce",
     Limit: 3,
-    FilterExpression: "contains(#Meals, :v)",
-    ExpressionAttributeNames: { "#Meals": "Meals" },
+    FilterExpression: "contains(#meals, :v)",
+    ExpressionAttributeNames: { "#meals": "meals" },
     ExpressionAttributeValues: { ":v": meal }
   };
 
@@ -51,7 +51,7 @@ const SauceIntentHandler = {
     if (sauceDocs.length) {
       if (sauceDocs.length > 1) {
         const saucesNames = sauceDocs
-          .map(sauce => sauce.NameSauce)
+          .map(sauce => sauce.name)
           .toString()
           .replace(",", " ou ");
 
@@ -60,7 +60,7 @@ const SauceIntentHandler = {
           saucesNames +
           ". Laquelle préférez-vous ?";
       } else {
-        const sauceName = sauceDocs[0].NameSauce;
+        const sauceName = sauceDocs[0].name;
         speechOutput =
           "Je vous propose la sauce " + sauceName + " pour accompagner ce plat";
       }
