@@ -44,6 +44,9 @@ const SauceIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes();   
+    
     let speechOutput = "";
     const intent = handlerInput.requestEnvelope.request.intent;
     const mealValue = intent.slots.Repas.value;
@@ -61,11 +64,14 @@ const SauceIntentHandler = {
           ". Laquelle préférez-vous ?";
       } else {
         const sauceName = sauceDocs[0].name;
+        sessionAttributes.sauceName = sauceName;
+        attributesManager.setSessionAttribute(sessionAttributes);
         speechOutput =
-          "Je vous propose la sauce " + sauceName + " pour accompagner ce plat";
+          "Je vous propose la sauce " + sessionAttributes.sauceName + " pour accompagner ce plat. Est-ce-que cela vous convient ?";
+        
       }
     } else {
-      speechOutput += "Je ne trouve pas de sauce pour ce plat. A la prochaine.";
+      speechOutput = "Je ne trouve pas de sauce pour ce plat. A la prochaine.";
       return handlerInput.responseBuilder.speak(speechOutput).getResponse();
     }
     return handlerInput.responseBuilder
@@ -73,6 +79,26 @@ const SauceIntentHandler = {
       .reprompt(speechOutput)
       .getResponse();
   }
+};
+
+const ConfirmIntentHandler = {
+  canHandle(handlerInput) {
+    return (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+      handlerInput.requestEnvelope.request.intent.name === "AMAZON.YesIntent"
+    );
+  },
+  handle(handlerInput) {
+    let speechOutput = "";
+   
+      speechOutput = "C'est parti pour la sauce" ;
+    
+    
+    return handlerInput.responseBuilder
+      .speak(speechOutput)
+      .reprompt(speechOutput)
+      .getResponse();
+  }
+      
 };
 
 const HelpIntentHandler = {
@@ -91,6 +117,8 @@ const HelpIntentHandler = {
       .getResponse();
   }
 };
+
+
 
 const CancelAndStopIntentHandler = {
   canHandle(handlerInput) {
@@ -144,6 +172,7 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
     SauceIntentHandler,
+    ConfirmIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler
