@@ -9,7 +9,7 @@ function getSaucesForMeal(meal, callback) {
     TableName: "sauce",
     Limit: 3,
     FilterExpression: "contains(#meals, :v)",
-    ExpressionAttributeNames: { "#meals": "meals" },
+    ExpressionAttributeNames: { "#meals": "meals" } , 
     ExpressionAttributeValues: { ":v": meal }
   };
 
@@ -53,11 +53,14 @@ const SauceIntentHandler = {
     const sauceDocs = await util.promisify(getSaucesForMeal)(mealValue);
     if (sauceDocs.length) {
       if (sauceDocs.length > 1) {
+        sessionAttributes.saucesNames = sauceDocs.map(sauce => sauce.name);
+        attributesManager.setSessionAttributes(sessionAttributes);
         const saucesNames = sauceDocs
           .map(sauce => sauce.name)
           .toString()
           .replace(",", " ou ");
-
+          
+        
         speechOutput =
           "J'ai trouvé plusieurs sauces pouvant accompagner ce plat : " +
           saucesNames +
@@ -65,10 +68,10 @@ const SauceIntentHandler = {
       } else {
         const sauceName = sauceDocs[0].name;
         sessionAttributes.sauceName = sauceName;
-        attributesManager.setSessionAttribute(sessionAttributes);
+        attributesManager.setSessionAttributes(sessionAttributes);
         speechOutput =
-          "Je vous propose la sauce " + sessionAttributes.sauceName + " pour accompagner ce plat. Est-ce-que cela vous convient ?";
-        
+          "Je vous propose la sauce " + sauceName + " pour accompagner ce plat. Est-ce-que cela vous convient ?";
+          
       }
     } else {
       speechOutput = "Je ne trouve pas de sauce pour ce plat. A la prochaine.";
@@ -80,6 +83,31 @@ const SauceIntentHandler = {
       .getResponse();
   }
 };
+const ChoiceIntentHandler = {
+  canHandle(handlerInput) {
+    return (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+      handlerInput.requestEnvelope.request.intent.name === "ChoiceIntent"
+    );
+  },
+  handle(handlerInput) {
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes();
+    let recipeSteps= handlerInput.requestEnvelope.request.intent.slots.Sauce.value;
+    sessionAttributes.recipeSteps = recipeSteps;
+    attributesManager.setSessionAttributes(sessionAttributes);
+    let speechOutput = "";
+    if (handlerInput.requestEnvelope.request.intent.name === sessionAttributes.saucesNames[0] ||
+      sessionAttributes.saucesNames[1] || sessionAttributes.saucesNames[2]) {
+      speechOutput = "Fais péter la sauce " + handlerInput.requestEnvelope.request.intent.slots.Sauce.value + "." + " Pour cette recette, il vous faudra trois oeufs";
+      
+    }
+    return handlerInput.responseBuilder
+      .speak(speechOutput)
+      .reprompt(speechOutput)
+      .getResponse();
+  }
+};
+
 
 const ConfirmIntentHandler = {
   canHandle(handlerInput) {
@@ -88,14 +116,14 @@ const ConfirmIntentHandler = {
     );
   },
   handle(handlerInput) {
-    let speechOutput = "";
-   
-      speechOutput = "C'est parti pour la sauce" ;
+    let speechText = "";
+    
+      speechText = "C'est parti pour la sauce";
     
     
     return handlerInput.responseBuilder
-      .speak(speechOutput)
-      .reprompt(speechOutput)
+      .speak(speechText)
+      .reprompt(speechText)
       .getResponse();
   }
       
@@ -172,6 +200,7 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
     SauceIntentHandler,
+    ChoiceIntentHandler,
     ConfirmIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
