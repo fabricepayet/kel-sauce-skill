@@ -54,12 +54,13 @@ const SauceIntentHandler = {
     if (sauceDocs.length) {
       if (sauceDocs.length > 1) {
         sessionAttributes.saucesNames = sauceDocs.map(sauce => sauce.name);
+        sessionAttributes.ingredientsList = sauceDocs.map(sauce => sauce.ingredients).toString();
         attributesManager.setSessionAttributes(sessionAttributes);
         const saucesNames = sauceDocs
           .map(sauce => sauce.name)
           .toString()
           .replace(",", " ou ");
-          
+        
         
         speechOutput =
           "J'ai trouvé plusieurs sauces pouvant accompagner ce plat : " +
@@ -92,13 +93,13 @@ const ChoiceIntentHandler = {
   handle(handlerInput) {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes();
-    let recipeSteps= handlerInput.requestEnvelope.request.intent.slots.Sauce.value;
-    sessionAttributes.recipeSteps = recipeSteps;
+    let choice= handlerInput.requestEnvelope.request.intent.slots.Sauce.value;
+    sessionAttributes.choice = choice;
     attributesManager.setSessionAttributes(sessionAttributes);
     let speechOutput = "";
     if (handlerInput.requestEnvelope.request.intent.name === sessionAttributes.saucesNames[0] ||
       sessionAttributes.saucesNames[1] || sessionAttributes.saucesNames[2]) {
-      speechOutput = "Fais péter la sauce " + handlerInput.requestEnvelope.request.intent.slots.Sauce.value + "." + " Pour cette recette, il vous faudra trois oeufs";
+      speechOutput = "Fais péter la sauce " + handlerInput.requestEnvelope.request.intent.slots.Sauce.value + "." + " Pour cette recette, il vous faudra " + sessionAttributes.ingredientsList;
       
     }
     return handlerInput.responseBuilder

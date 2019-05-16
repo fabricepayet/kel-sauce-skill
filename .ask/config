@@ -26,7 +26,7 @@
             "codeUri": "lambda/custom",
             "functionName": "ask-custom-Quelle_sauce-default",
             "handler": "index.handler",
-            "revisionId": "be4d441f-966c-4d6a-b9a9-8b27ceb585a2",
+            "revisionId": "41698465-53ce-4992-a85d-c40e468d8ef0",
             "runtime": "nodejs8.10"
           }
         ]
