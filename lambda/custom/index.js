@@ -59,7 +59,8 @@ const SauceIntentHandler = {
   canHandle(handlerInput) {
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-      handlerInput.requestEnvelope.request.intent.name === "Meal"
+      handlerInput.requestEnvelope.request.intent.name === "Meal" &&
+      sessionAttributes.step !== "choiceSauce"
     );
   },
   async handle(handlerInput) {
@@ -70,6 +71,7 @@ const SauceIntentHandler = {
     const intent = handlerInput.requestEnvelope.request.intent;
     const mealValue = intent.slots.Repas.value;
     const sauceDocs = await util.promisify(getSaucesForMeal)(mealValue);
+    sessionAttributes.step = "choiceSauce";
     if (sauceDocs.length) {
       if (sauceDocs.length > 1) {
         sessionAttributes.saucesNames = sauceDocs.map(sauce => sauce.name);
@@ -109,19 +111,25 @@ function renderSteps() {
 
 const ChoiceIntentHandler = {
   canHandle(handlerInput) {
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes();
+    console.log(
+      "Choice intent handler (canHandle) sessionAttributes",
+      sessionAttributes
+    );
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-      handlerInput.requestEnvelope.request.intent.name === "ChoiceIntent"
+      handlerInput.requestEnvelope.request.intent.name === "ChoiceIntent" &&
+      sessionAttributes.step === "choiceSauce"
     );
   },
   handle(handlerInput) {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes();
-    let choice = handlerInput.requestEnvelope.request.intent.slots.Sauce.value;
-    sessionAttributes.choice = choice;
+    sessionAttributes.step = "choiceMeal";
     attributesManager.setSessionAttributes(sessionAttributes);
     let speechOutput = "";
-    const ents = "";
+    const renderIngredientsList = "";
     if (
       true
       // vérifier si la sauce est dans les attributes de session
@@ -131,21 +139,26 @@ const ChoiceIntentHandler = {
         handlerInput.requestEnvelope.request.intent
       );
       const name = "Blanche";
-      getSauceByName();
-      speechOutput =
-        "Fais péter la sauce " +
-        handlerInput.requestEnvelope.request.intent.slots.Sauce.value +
-        "." +
-        " Pour cette recette, il vous faudra " +
-        ents +
-        "." +
-        "Les différentes étapes sont :" +
-        renderSteps();
+      getSauceByName(name, err => {
+        if (err) {
+          console.error(err);
+          return;
+        } else {
+          speechOutput =
+            "Pour la sauce " +
+            handlerInput.requestEnvelope.request.intent.slots.Sauce.value +
+            ", il vous faudra " +
+            renderIngredientsList +
+            "." +
+            "Les différentes étapes sont :" +
+            renderSteps();
+        }
+        return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .reprompt(speechOutput)
+          .getResponse();
+      });
     }
-    return handlerInput.responseBuilder
-      .speak(speechOutput)
-      .reprompt(speechOutput)
-      .getResponse();
   }
 };
 
