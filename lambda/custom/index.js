@@ -32,7 +32,6 @@ function getSauceByName(sauceName, callback) {
   };
 
   docClient.scan(params, function(err, data) {
-    console.log("getSauceByName DATA", data);
     if (err) {
       callback(err);
     } else {
@@ -59,16 +58,14 @@ const LaunchRequestHandler = {
 };
 
 function renderSpeechForSauce(sauceDoc) {
-  const speechText = "";
+  let speechText = "";
 
   const { name, ingredients, steps } = sauceDoc;
 
-  speechText += `C'est parti pour la sauce ${name};`;
-  speechText += `Il vous faudra cette liste d'ingrédients :`;
+  speechText += `C'est parti pour la sauce ${name},`;
+  speechText += ` il vous faudra cette liste d'ingrédients :`;
 
-  ingredients.forEach(ingredient => (speechText += `- ${ingredient}`));
-
-  speechText += `.`;
+  speechText += ingredients.toString();
 
   if (steps) {
     //TODO
@@ -148,10 +145,10 @@ const ChoiceIntentHandler = {
       true
       // vérifier si la sauce est dans les attributes de session
     ) {
-      const sauce = await util.promisify(getSauceByName)(
+      const sauceDoc = await util.promisify(getSauceByName)(
         sessionAttributes.sauceName
       );
-      const speechText = renderSpeechForSauce(sauce);
+      const speechText = renderSpeechForSauce(sauceDoc);
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
@@ -173,11 +170,8 @@ const ConfirmIntentHandler = {
   async handle(handlerInput) {
     const attributesManager = handlerInput.attributesManager;
     const { sauceName } = attributesManager.getSessionAttributes();
-
-    const sauce = await util.promisify(getSauceByName)(sauceName);
-
-    const speechText = renderSpeechForSauce(sauce);
-
+    const sauceDoc = await util.promisify(getSauceByName)(sauceName);
+    const speechText = renderSpeechForSauce(sauceDoc);
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
@@ -194,7 +188,6 @@ const HelpIntentHandler = {
   },
   handle(handlerInput) {
     const speechText = "Je peux vous aider";
-
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
@@ -239,7 +232,7 @@ const ErrorHandler = {
     return true;
   },
   handle(handlerInput, error) {
-    console.log(`Error handled: ${error.message}`);
+    console.log(`----> Error: ${error.message}`);
 
     return handlerInput.responseBuilder
       .speak("Une erreur s'est produite, veillez vérifier les journaux")
