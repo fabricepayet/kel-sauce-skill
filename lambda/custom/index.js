@@ -90,8 +90,11 @@ const SauceIntentHandler = {
 
     let speechOutput = "";
     const intent = handlerInput.requestEnvelope.request.intent;
+    console.log(">>>intent", intent);
     const mealValue = intent.slots.Repas.value;
+    console.log(">>>mealValue", mealValue);
     const sauceDocs = await util.promisify(getSaucesForMeal)(mealValue);
+    console.log(">>>sauceDocs", sauceDocs);
     sessionAttributes.step = "choiceSauce";
     if (sauceDocs.length) {
       if (sauceDocs.length > 1) {
