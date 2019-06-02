@@ -56,14 +56,14 @@ const LaunchRequestHandler = {
 };
 
 function renderSpeechForSauce(sauceDoc) {
- const speechText = "";
+  const speechText = "";
 
- const {name, ingredients, steps} = sauceDoc;
+  const { name, ingredients, steps } = sauceDoc;
 
- speechText += `C'est parti pour la sauce ${name};`
- speechText += `Il vous faudra cette liste d'ingrédients :`
+  speechText += `C'est parti pour la sauce ${name};`;
+  speechText += `Il vous faudra cette liste d'ingrédients :`;
 
- ingredients.forEach(ingredient => speechText += `- ${ingredient}`);
+  ingredients.forEach(ingredient => (speechText += `- ${ingredient}`));
 
   speechText += `.`;
 
@@ -71,7 +71,7 @@ function renderSpeechForSauce(sauceDoc) {
     //TODO
   }
 
- return speechText;
+  return speechText;
 }
 
 const SauceIntentHandler = {
@@ -126,18 +126,10 @@ const SauceIntentHandler = {
   }
 };
 
-function renderSteps() {
-  return "";
-}
-
 const ChoiceIntentHandler = {
   canHandle(handlerInput) {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes();
-    console.log(
-      "Choice intent handler (canHandle) sessionAttributes",
-      sessionAttributes
-    );
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
       handlerInput.requestEnvelope.request.intent.name === "ChoiceIntent" &&
@@ -149,36 +141,16 @@ const ChoiceIntentHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes();
     sessionAttributes.step = "choiceMeal";
     attributesManager.setSessionAttributes(sessionAttributes);
-    let speechOutput = "";
-    const renderIngredientsList = "";
     if (
       true
       // vérifier si la sauce est dans les attributes de session
     ) {
-      console.log(
-        "ChoiceIntentHandler intent",
-        handlerInput.requestEnvelope.request.intent
-      );
-      const name = "Blanche";
-      getSauceByName(name, err => {
-        if (err) {
-          console.error(err);
-          return;
-        } else {
-          speechOutput =
-            "Pour la sauce " +
-            handlerInput.requestEnvelope.request.intent.slots.Sauce.value +
-            ", il vous faudra " +
-            renderIngredientsList +
-            "." +
-            "Les différentes étapes sont :" +
-            renderSteps();
-        }
-        return handlerInput.responseBuilder
-          .speak(speechOutput)
-          .reprompt(speechOutput)
-          .getResponse();
-      });
+    const sauce = await util.promisify(getSauceByName)(sessionAttributes.sauceName);
+    const speechText = renderSpeechForSauce(sauce);
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .getResponse();
     }
   }
 };
@@ -190,16 +162,16 @@ const ConfirmIntentHandler = {
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
       handlerInput.requestEnvelope.request.intent.name === "AMAZON.YesIntent" &&
-      sessionAttributes.step === 'choiceSauce'
+      sessionAttributes.step === "choiceSauce"
     );
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const attributesManager = handlerInput.attributesManager;
     const { sauceName } = attributesManager.getSessionAttributes();
 
     const sauce = await util.promisify(getSauceByName)(sauceName);
 
-    const speechText = renderSpeechForSauce(sauce)
+    const speechText = renderSpeechForSauce(sauce);
 
     return handlerInput.responseBuilder
       .speak(speechText)
