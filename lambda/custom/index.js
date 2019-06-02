@@ -36,7 +36,10 @@ function getSauceByName(sauceName, callback) {
     if (err) {
       callback(err);
     } else {
-      callback(null, data.Items);
+      if (!data.Items.length) {
+        return callback(new Error("Not found"));
+      }
+      callback(null, data.Items[0]);
     }
   });
 }
@@ -136,7 +139,7 @@ const ChoiceIntentHandler = {
       sessionAttributes.step === "choiceSauce"
     );
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const attributesManager = handlerInput.attributesManager;
     const sessionAttributes = attributesManager.getSessionAttributes();
     sessionAttributes.step = "choiceMeal";
@@ -145,12 +148,14 @@ const ChoiceIntentHandler = {
       true
       // vérifier si la sauce est dans les attributes de session
     ) {
-    const sauce = await util.promisify(getSauceByName)(sessionAttributes.sauceName);
-    const speechText = renderSpeechForSauce(sauce);
-    return handlerInput.responseBuilder
-      .speak(speechText)
-      .reprompt(speechText)
-      .getResponse();
+      const sauce = await util.promisify(getSauceByName)(
+        sessionAttributes.sauceName
+      );
+      const speechText = renderSpeechForSauce(sauce);
+      return handlerInput.responseBuilder
+        .speak(speechText)
+        .reprompt(speechText)
+        .getResponse();
     }
   }
 };
