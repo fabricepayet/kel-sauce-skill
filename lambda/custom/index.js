@@ -57,6 +57,8 @@ const LaunchRequestHandler = {
 
 const SauceIntentHandler = {
   canHandle(handlerInput) {
+    const attributesManager = handlerInput.attributesManager;
+    const sessionAttributes = attributesManager.getSessionAttributes();
     return (
       handlerInput.requestEnvelope.request.type === "IntentRequest" &&
       handlerInput.requestEnvelope.request.intent.name === "Meal" &&
