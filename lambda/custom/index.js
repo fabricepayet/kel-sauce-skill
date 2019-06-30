@@ -90,11 +90,8 @@ const SauceIntentHandler = {
 
     let speechOutput = "";
     const intent = handlerInput.requestEnvelope.request.intent;
-    console.log(">>>intent", intent);
     const mealValue = intent.slots.Repas.value;
-    console.log(">>>mealValue", mealValue);
     const sauceDocs = await util.promisify(getSaucesForMeal)(mealValue);
-    console.log(">>>sauceDocs", sauceDocs);
     sessionAttributes.step = "choiceSauce";
     if (sauceDocs.length) {
       if (sauceDocs.length > 1) {
@@ -220,12 +217,6 @@ const SessionEndedRequestHandler = {
     return handlerInput.requestEnvelope.request.type === "SessionEndedRequest";
   },
   handle(handlerInput) {
-    console.log(
-      `Session ended with reason: ${
-        handlerInput.requestEnvelope.request.reason
-      }`
-    );
-
     return handlerInput.responseBuilder.getResponse();
   }
 };
@@ -235,8 +226,6 @@ const ErrorHandler = {
     return true;
   },
   handle(handlerInput, error) {
-    console.log(`----> Error: ${error.message}`);
-
     return handlerInput.responseBuilder
       .speak("Une erreur s'est produite, veillez vérifier les journaux")
       .reprompt("Une erreur s'est produite, veillez vérifier les journaux")
